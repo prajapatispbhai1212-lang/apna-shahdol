@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>अपना शहडोल | जिला जानकारी पोर्टल</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+  <h1>🌳 अपना शहडोल</h1>
+  <p>शहडोल जिले की संपूर्ण जानकारी एक ही जगह</p>
+</header>
+
+<nav>
+  <a href="#home">होम</a>
+  <a href="#departments">विभाग</a>
+  <a href="#information">जानकारी</a>
+  <a href="#about">हमारे बारे में</a>
+  <a href="/admin">Admin Login</a>
+</nav>
+
+<section class="hero" id="home">
+  <h2>मेरा शहडोल, मेरा अभिमान</h2>
+  <p>अपने जिले को जानें, अपने जिले को पहचानें।</p>
+  <input id="search" placeholder="🔍 स्कूल, गाँव, मंदिर, कॉलेज खोजें..."
+  oninput="loadEntries()">
+</section>
+
+<main class="container">
+
+<h2 class="heading">हमारा जिला एक नजर में</h2>
+
+<div class="stats">
+  <div class="stat"><h2>886</h2><p>गाँव (प्रारंभिक आँकड़ा)</p></div>
+  <div class="stat"><h2>391</h2><p>ग्राम पंचायत (प्रारंभिक आँकड़ा)</p></div>
+  <div class="stat"><h2>10.66 लाख</h2><p>जनसंख्या (2011)</p></div>
+  <div class="stat"><h2>5610</h2><p>क्षेत्रफल वर्ग किमी</p></div>
+</div>
+
+<section id="departments">
+<h2 class="heading">जिले के प्रमुख विभाग</h2>
+<div class="cards" id="categoryCards">
+  <div class="card"><h3>🎓 शिक्षा</h3><p>स्कूल, कॉलेज और यूनिवर्सिटी</p></div>
+  <div class="card"><h3>🏘️ गाँव</h3><p>गाँव, पंचायत और तहसील</p></div>
+  <div class="card"><h3>🛕 धार्मिक स्थल</h3><p>मंदिर और अन्य धार्मिक स्थल</p></div>
+  <div class="card"><h3>🌾 कृषि</h3><p>खेती और फसलें</p></div>
+  <div class="card"><h3>🏥 स्वास्थ्य</h3><p>अस्पताल और स्वास्थ्य केंद्र</p></div>
+  <div class="card"><h3>🛣️ परिवहन</h3><p>सड़क और रेलवे</p></div>
+  <div class="card"><h3>🏢 प्रशासन</h3><p>सरकारी कार्यालय</p></div>
+  <div class="card"><h3>💼 रोजगार</h3><p>रोजगार और व्यवसाय</p></div>
+</div>
+</section>
+
+<section id="information">
+<h2 class="heading">📚 शहडोल की जानकारी</h2>
+
+<div class="filter">
+  <select id="category" onchange="loadEntries()">
+    <option value="">सभी विभाग</option>
+  </select>
+</div>
+
+<div class="cards" id="entries">
+  <p>जानकारी लोड हो रही है...</p>
+</div>
+</section>
+
+<section id="about">
+<h2 class="heading">शहडोल के बारे में</h2>
+<div class="card">
+<p>
+शहडोल मध्य प्रदेश का एक महत्वपूर्ण जिला है।
+यह अपनी प्राकृतिक सुंदरता, आदिवासी संस्कृति,
+ऐतिहासिक धरोहर, कृषि और खनिज संपदा के लिए जाना जाता है।
+इस वेबसाइट का उद्देश्य जिले की उपयोगी जानकारी
+आम नागरिकों तक पहुँचाना है।
+</p>
+</div>
+</section>
+
+</main>
+
+<footer>
+<h2>🌳 अपना शहडोल</h2>
+<p>हमारा जिला, हमारी पहचान</p>
+<p>© 2026 Apna Shahdol</p>
+<p>यह स्वतंत्र जनसूचना पोर्टल है, सरकारी वेबसाइट नहीं।</p>
+</footer>
+
+<script>
+const icons = {
+ "शिक्षा":"🎓","स्कूल":"🏫","कॉलेज":"🎓",
+ "गाँव":"🏘️","ग्राम पंचायत":"🏡","तहसील":"🏢",
+ "सड़क":"🛣️","मंदिर":"🛕","पर्यटन":"🌄",
+ "कृषि":"🌾","अस्पताल":"🏥",
+ "सरकारी कार्यालय":"🏛️","पुलिस":"👮",
+ "व्यापार":"🏪","रोजगार":"💼","अन्य":"📌"
+};
+
+async function loadCategories(){
+ try {
+   const res = await fetch("/api/categories");
+   const categories = await res.json();
+   const select = document.getElementById("category");
+
+   categories.forEach(cat=>{
+     const option = document.createElement("option");
+     option.value = cat;
+     option.textContent = cat;
+     select.appendChild(option);
+   });
+ } catch(e) {
+   console.error(e);
+ }
+}
+
+async function loadEntries(){
+ const search = document.getElementById("search").value;
+ const category = document.getElementById("category").value;
+ const params = new URLSearchParams({search,category});
+
+ const box = document.getElementById("entries");
+ box.textContent = "जानकारी लोड हो रही है...";
+
+ try {
+   const res = await fetch("/api/entries?"+params);
+   if(!res.ok) throw new Error("लोड नहीं हुआ");
+   const data = await res.json();
+
+   box.replaceChildren();
+
+   if(data.length===0){
+     box.textContent="अभी इस विभाग में जानकारी उपलब्ध नहीं है।";
+     return;
+   }
+
+   data.forEach(item=>{
+     const card = document.createElement("article");
+     card.className="card";
+
+     const heading=document.createElement("h3");
+     heading.textContent=(icons[item.category]||"📌")+" "+item.title;
+
+     const cat=document.createElement("small");
+     cat.textContent=item.category;
+
+     const description=document.createElement("p");
+     description.textContent=item.description;
+
+     card.append(heading,cat,description);
+
+     if(item.address){
+       const address=document.createElement("p");
+       address.textContent="📍 "+item.address;
+       card.append(address);
+     }
+
+     if(item.phone){
+       const phone=document.createElement("p");
+       phone.textContent="📞 "+item.phone;
+       card.append(phone);
+     }
+
+     if(item.image){
+       const img=document.createElement("img");
+       img.src=item.image;
+       img.alt=item.title;
+       img.loading="lazy";
+       img.className="entry-image";
+       img.referrerPolicy="no-referrer";
+       img.onerror=()=>img.remove();
+       card.prepend(img);
+     }
+
+     box.append(card);
+   });
+ } catch(e){
+   box.textContent="जानकारी लोड नहीं हो सकी।";
+ }
+}
+
+loadCategories();
+loadEntries();
+</script>
+</body>
+</html>
