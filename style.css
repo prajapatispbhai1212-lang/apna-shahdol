@@ -1,0 +1,159 @@
+
+*{
+ margin:0;
+ padding:0;
+ box-sizing:border-box;
+}
+
+body{
+ font-family:Arial,sans-serif;
+ background:#f3f7f4;
+ color:#26352c;
+}
+
+.header{
+ background:#075b39;
+ color:white;
+ text-align:center;
+ padding:25px 12px;
+}
+
+.header h1{font-size:30px}
+.header p{margin-top:8px}
+
+nav{
+ background:#063d29;
+ display:flex;
+ justify-content:center;
+ flex-wrap:wrap;
+ gap:20px;
+ padding:15px;
+}
+
+nav a{
+ color:white;
+ text-decoration:none;
+ font-weight:bold;
+}
+
+nav a:hover{color:#f8d76a}
+
+.hero{
+ background:linear-gradient(90deg,#075b39dd,#075b3988),
+ url("https://images.unsplash.com/photo-1448375240586-882707db888b?w=1400");
+ background-position:center;
+ background-size:cover;
+ text-align:center;
+ padding:80px 15px;
+ color:white;
+}
+
+.hero h2{
+ font-size:36px;
+ margin-bottom:15px;
+}
+
+.hero input{
+ width:90%;
+ max-width:600px;
+ padding:15px;
+ border-radius:30px;
+ border:0;
+ font-size:16px;
+ margin-top:25px;
+}
+
+.container{
+ max-width:1150px;
+ margin:auto;
+ padding:25px 15px;
+}
+
+.heading{
+ text-align:center;
+ color:#075b39;
+ margin:35px 0 20px;
+}
+
+.stats,.cards{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+ gap:16px;
+ margin:20px 0;
+}
+
+.stat,.card{
+ background:white;
+ padding:22px;
+ border-radius:12px;
+ box-shadow:0 3px 12px #00000012;
+ overflow-wrap:anywhere;
+}
+
+.stat{text-align:center;border-bottom:4px solid #16804d}
+.stat h2{color:#087044;margin-bottom:10px}
+
+.card h3{color:#087044;margin-bottom:12px}
+.card p{line-height:1.7;margin:8px 0}
+
+.entry-image{
+ width:100%;
+ height:170px;
+ object-fit:cover;
+ border-radius:8px;
+ margin-bottom:12px;
+}
+
+input,select,textarea{
+ width:100%;
+ padding:12px;
+ margin:8px 0 15px;
+ border:1px solid #ccc;
+ border-radius:7px;
+ font-size:15px;
+ background:white;
+}
+
+textarea{min-height:100px;resize:vertical}
+
+button{
+ background:#087044;
+ color:white;
+ padding:11px 17px;
+ border:0;
+ border-radius:7px;
+ margin:5px 5px 5px 0;
+ cursor:pointer;
+ font-size:15px;
+}
+
+button:hover{background:#06452d}
+
+.row{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ flex-wrap:wrap;
+ gap:12px;
+}
+
+.filter{max-width:350px;margin:auto}
+
+footer{
+ background:#063d29;
+ color:white;
+ text-align:center;
+ padding:35px 10px;
+ line-height:2;
+ margin-top:35px;
+}
+
+[hidden]{display:none!important}
+
+@media(max-width:600px){
+ .hero h2{font-size:27px}
+ .header h1{font-size:25px}
+ nav{gap:13px}
+ nav a{font-size:14px}
+ .container{padding:15px 10px}
+}
