@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>अपना शहडोल - Admin Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+<h1>🔐 अपना शहडोल Admin</h1>
+<p>वेबसाइट कंट्रोल पैनल</p>
+</header>
+
+<main class="container">
+
+<div class="card" id="loginBox">
+<h2>एडमिन लॉगिन</h2>
+<form id="loginForm">
+<input id="username" placeholder="यूजरनेम" required>
+<input id="password" type="password" placeholder="पासवर्ड" required>
+<button>लॉगिन करें</button>
+</form>
+<p id="loginMessage"></p>
+</div>
+
+<div id="dashboard" hidden>
+
+<div class="row">
+<h2>Admin Dashboard</h2>
+<button onclick="logout()">Logout</button>
+</div>
+
+<div class="stats">
+<div class="stat">
+<h2 id="total">0</h2>
+<p>कुल जानकारी</p>
+</div>
+<div class="stat">
+<h2>✓</h2>
+<p>एडमिन सक्रिय</p>
+</div>
+</div>
+
+<div class="card">
+<h2 id="formTitle">नई जानकारी जोड़ें</h2>
+
+<form id="entryForm">
+
+<input type="hidden" id="entryId">
+
+<label>जानकारी का नाम *</label>
+<input id="title" maxlength="150" required>
+
+<label>विभाग *</label>
+<select id="entryCategory" required></select>
+
+<label>विवरण *</label>
+<textarea id="description" maxlength="2000" required></textarea>
+
+<label>पता</label>
+<input id="address" maxlength="300">
+
+<label>मोबाइल नंबर</label>
+<input id="phone" maxlength="30">
+
+<label>फोटो URL (वैकल्पिक)</label>
+<input id="image" type="url">
+
+<button type="submit">जानकारी सेव करें</button>
+<button type="button" onclick="resetForm()">नया फॉर्म</button>
+
+</form>
+<p id="message"></p>
+</div>
+
+<h2 class="heading">सभी जानकारी प्रबंधित करें</h2>
+<div id="adminEntries" class="cards"></div>
+
+</div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+async function api(url, options={}) {
+ const response=await fetch(url,{
+   credentials:"same-origin",
+   ...options,
+   headers:{
+     "Content-Type":"application/json",
+     ...(options.headers||{})
+   }
+ });
+
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok) throw new Error(data.error||"कुछ गलत हुआ");
+ return data;
+}
+
+async function checkLogin(){
+ try{
+   await api("/api/me");
+   $("loginBox").hidden=true;
+   $("dashboard").hidden=false;
+   await loadDashboard();
+   await loadEntries();
+ }catch(e){
+   $("loginBox").hidden=false;
+   $("dashboard").hidden=true;
+ }
+}
+
+$("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+
+ try{
+   await api("/api/login",{
+     method:"POST",
+     body:JSON.stringify({
+       username:$("username").value,
+       password:$("password").value
+     })
+   });
+
+   $("loginMessage").textContent="लॉगिन सफल!";
+   $("password").value="";
+   await checkLogin();
+ }catch(error){
+   $("loginMessage").textContent=error.message;
+ }
+});
+
+async function loadDashboard(){
+ const data=await api("/api/stats");
+ $("total").textContent=data.total;
+}
+
+async function loadCategories(){
+ const categories=await api("/api/categories");
+ categories.forEach(cat=>{
+   const opt=document.createElement("option");
+   opt.value=cat;
+   opt.textContent=cat;
+   $("entryCategory").append(opt);
+ });
+}
+
+$("entryForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+
+ const id=$("entryId").value;
+
+ const body={
+   title:$("title").value,
+   category:$("entryCategory").value,
+   description:$("description").value,
+   address:$("address").value,
+   phone:$("phone").value,
+   image:$("image").value
+ };
+
+ try{
+   await api(id?"/api/entries/"+id:"/api/entries",{
+     method:id?"PUT":"POST",
+     body:JSON.stringify(body)
+   });
+
+   $("message").textContent="जानकारी सफलतापूर्वक सेव हो गई!";
+   resetForm();
+   await loadEntries();
+   await loadDashboard();
+ }catch(error){
+   $("message").textContent=error.message;
+ }
+});
+
+async function loadEntries(){
+ try{
+   const data=await api("/api/entries");
+   const box=$("adminEntries");
+   box.replaceChildren();
+
+   if(data.length===0){
+     box.textContent="अभी कोई जानकारी नहीं जोड़ी गई है।";
+     return;
+   }
+
+   data.forEach(item=>{
+     const card=document.createElement("div");
+     card.className="card";
+
+     const title=document.createElement("h3");
+     title.textContent=item.title;
+
+     const category=document.createElement("p");
+     category.textContent=item.category;
+
+     const desc=document.createElement("p");
+     desc.textContent=item.description;
+
+     const edit=document.createElement("button");
+     edit.textContent="✏️ Edit";
+     edit.onclick=()=>editEntry(item);
+
+     const del=document.createElement("button");
+     del.textContent="🗑️ Delete";
+     del.onclick=()=>deleteEntry(item.id);
+
+     card.append(title,category,desc,edit,del);
+     box.append(card);
+   });
+ }catch(e){
+   $("adminEntries").textContent=e.message;
+ }
+}
+
+function editEntry(item){
+ $("entryId").value=item.id;
+ $("title").value=item.title;
+ $("entryCategory").value=item.category;
+ $("description").value=item.description;
+ $("address").value=item.address||"";
+ $("phone").value=item.phone||"";
+ $("image").value=item.image||"";
+ $("formTitle").textContent="जानकारी एडिट करें";
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function deleteEntry(id){
+ if(!confirm("क्या आप इस जानकारी को हटाना चाहते हैं?"))return;
+
+ try{
+   await api("/api/entries/"+id,{method:"DELETE"});
+   await loadEntries();
+   await loadDashboard();
+ }catch(e){
+   alert(e.message);
+ }
+}
+
+function resetForm(){
+ $("entryForm").reset();
+ $("entryId").value="";
+ $("formTitle").textContent="नई जानकारी जोड़ें";
+}
+
+async function logout(){
+ try{
+   await api("/api/logout",{method:"POST"});
+   location.reload();
+ }catch(e){
+   alert(e.message);
+ }
+}
+
+loadCategories();
+checkLogin();
+</script>
+</body>
+</html>
